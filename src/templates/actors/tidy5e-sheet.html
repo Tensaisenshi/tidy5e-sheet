@@ -1,3 +1,18 @@
+Handlebars.registerHelper('each_with_sort', (array, key, opts) ->
+    data  = Handlebars.createFrame(opts.data) if(opts.data)
+    array = array.sort (a, b) ->
+        a = a[key]
+        b = b[key]
+        return  1 if a > b
+        return  0 if a == b
+        return -1 if a < b
+    s = ''
+    for e, i in array
+        data.index = i if(data) # Support the usual @index.
+        s += opts.fn(e, data: data)
+    s
+)
+
 <form class="{{cssClass}}" autocomplete="off">
 	<div class="tidy5e-sheet {{#if actor.flags.tidy5e-sheet.allow-edit}}allow-edit{{/if}}">
 
@@ -279,7 +294,7 @@
 
 					{{!-- Skills --}}
 					<ul class="skills-list">
-						{{#each data.skills as |skill s|}}
+						{{#each_with_sort data.skills "lable" as |skill s|}}
 						<li class="skill {{#if skill.value}}proficient{{/if}}" data-skill="{{s}}">
 							<input type="hidden" name="data.skills.{{s}}.value" value="{{skill.value}}" data-dtype="Number">
 							<a class="proficiency-toggle skill-proficiency" title="{{skill.hover}}">{{{skill.icon}}}</a>
@@ -288,7 +303,7 @@
 							<span class="skill-mod">{{numberFormat skill.total decimals=0 sign=true}}</span>
 							<span class="skill-passive" title="{{skill.label}} ({{ localize 'DND5E.Passive' }})">({{skill.passive}})</span>
 						</li>
-						{{/each}}
+						{{/each_with_sort}}
 					</ul>
 
 					{{!-- Traits --}}
